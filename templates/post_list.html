@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<!-- SIDEBAR -->
+<div class="col-md-3">
+  <div class="profile-sidebar">
+    <!-- SIDEBAR USERPIC -->
+    <div class="profile-userpic">
+      <img src='{{ prof_pic.url }}' class="img-responsive" alt="">
+    </div>
+    <!-- END SIDEBAR USERPIC -->
+    <!-- SIDEBAR USER TITLE -->
+    <div class="profile-usertitle">
+      <div class="profile-usertitle-name">
+        {{ first_name }} {{ last_name }}
+      </div>
+      <div class="profile-usertitle-job">
+        @{{ username }}
+      </div>
+      <div class="profile-usertitle-job">
+        {{ bio }}
+      </div>
+    </div>
+    <!-- END SIDEBAR USER TITLE -->
+    <!-- SIDEBAR BUTTONS -->
+    <div class="profile-userbuttons">
+      <button type="button" class="btn btn-success btn-sm">Follow</button>
+      <button type="button" class="btn btn-danger btn-sm">Message</button>
+    </div>
+    <!-- END SIDEBAR BUTTONS -->
+    <!-- SIDEBAR MENU -->
+    <div class="profile-usermenu">
+      <ul class="nav">
+        <li class="active">
+          <a href="{% url 'posts:list' %}">
+          <i class="glyphicon glyphicon-home"></i>
+          Overview </a>
+        </li>
+        <li>
+          <a href="{% url 'posts:profile' %}">
+          <i class="glyphicon glyphicon-user"></i>
+          Profile </a>
+        </li>
+        <li>
+          <a href="{% url 'posts:create' %}">
+          <i class="glyphicon glyphicon-pencil"></i>
+          Add Post </a>
+        </li>
+        <li>
+          <a href="{% url 'logout' %}">
+          <i class="glyphicon glyphicon-log-out"></i>
+          Log Out </a>
+        </li>
+
+      </ul>
+    </div>
+    <!-- END MENU -->
+  </div>
+</div>
+<!-- END SIDEBAR -->
+{% endblock sidebar %}
+
+
+{% block content %}
+
+<form method='GET' action=''>
+  <input type='text' name='q' placeholder="Search posts" value='{{ request.GET.q  }}'/>
+  <input type='submit' value='Search' />
+</form>
+{% for object in object_list %}
+<div class="row">
+  <div class="col-sm-12">
+    <div class="thumbnail">
+      {% if object.image %}
+      <img src='{{ object.image.url }}' class='img-responsive'/>
+      {% endif %}
+      <!-- <img src="..." alt="..."> -->
+      <div class="caption">
+        <p>Author: @{{ object.author }}</p>
+        <p>Posted on: {{ object.updated }}</p>
+        <p>{{ object.content|linebreaks|truncatechars:120 }}</p>
+        <p><a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">View</a></p>
+      </div>
+    </div>
+  </div>
+<hr/>
+</div>
+{% endfor %}
+
+<div class="pagination">
+    <span class="step-links">
+        {% if object_list.has_previous %}
+            <a href="?{{ page_request_var }}={{ object_list.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ object_list.number }} of {{ object_list.paginator.num_pages }}
+        </span>
+
+        {% if object_list.has_next %}
+            <a href="?{{ page_request_var }}={{ object_list.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">next</a>
+        {% endif %}
+    </span>
+</div>
+</div>
+
+{% endblock content %}

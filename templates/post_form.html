@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+<body>
+	<form class="form-horizontal" method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+		<legend>{{ title }} Post</legend>
+		{{ form|crispy }}
+		<div class="form-group">
+				<input type="submit" class="btn btn-primary" value='{{ title }}' />
+			</div>
+		</div>
+	</form>
+
+{% endblock content %}

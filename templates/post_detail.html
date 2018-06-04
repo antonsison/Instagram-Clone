@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+	{% if instance.image %}
+	<img src='{{ instance.image.url }}' class='img-responsive'/>
+	{% endif %}
+	<p>Author: @{{ instance.author }}</p>
+	<p>Posted on: {{ instance.updated }}</p>
+	{{ instance.content|linebreaks }}<br>
+
+	{% if request.user == instance.author %}
+	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a></p>
+	<p><a href="{{ instance.get_absolute_url }}delete" class="btn btn-danger" role="button">Delete</a></p>
+	{% endif %}
+	
+{% endblock content %}
