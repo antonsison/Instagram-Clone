@@ -31,13 +31,18 @@ class LoginView(generic.TemplateView):
 		context = self.get_context_data()
 		form = context.get('form')
 		if form.is_valid():
-			username = form.cleaned_data.get("username")
-			password = form.cleaned_data.get("password")
-			user_qs = User.objects.filter(username=username)
-			if user_qs.count()==1:
-				user = user_qs.first()
-				login(request, user)
-				return redirect("/")
+			# username = form.cleaned_data.get("username")
+			# password = form.cleaned_data.get("password")
+			# user_qs = User.objects.filter(username=username)
+			# if user_qs.count()==1:
+			# 	user = user_qs.first()
+			# 	login(request, user)
+			# 	return redirect("/")
+			username = self.request.POST['username']
+			password = self.request.POST['password']
+			new_user = authenticate(username=username, password=password)
+			login(self.request, new_user)
+			return redirect("/")
 
 		return render(request, self.template_name, context)
 
@@ -48,7 +53,7 @@ class RegisterView(generic.TemplateView):
 	def get_context_data(self, *args, **kwargs):
 		context = super(RegisterView, self).get_context_data(*args, **kwargs)
 		title = "Register"
-		form = UserRegisterForm(self.request.POST or None)
+		form = UserRegisterForm(self.request.POST or None, self.request.FILES or None)
 		context.update({
 			"title":title,
 			"form":form,
@@ -59,11 +64,32 @@ class RegisterView(generic.TemplateView):
 		context = self.get_context_data()
 		form = context.get('form')
 		if form.is_valid():
-			user = form.save(commit=False)
-			password = form.cleaned_data.get('password')
-			user.set_password(password)
+			# user = form.save(commit=False)
+			# email = form.cleaned_data.get('email')
+			# first_name = form.cleaned_data.get('first_name')
+			# last_name = form.cleaned_data.get('last_name')
+			# username = form.cleaned_data.get('username')
+			# password = form.cleaned_data.get('password')
+			# bio = form.cleaned_data.get('bio')
+			# prof_pic = form.cleaned_data.get('prof_pic')
+			# user.set_password(password)
+			# user.save()
+			# return redirect("login")
+
+			user = User()
+			instance = Profile()
+			user.email = self.request.POST['email']
+			user.first_name = self.request.POST['first_name']
+			user.last_name = self.request.POST['last_name']
+			user.username = self.request.POST['username']
+			user.password = self.request.POST['password']
+			user.set_password(user.password)
 			user.save()
+			instance.bio = self.request.POST['bio']
+			instance.user = user
+			instance.save()
 			return redirect("login")
+
 
 		return render(request, self.template_name, context)
 
@@ -73,3 +99,8 @@ class LogoutView(generic.TemplateView):
 	def get(self, request):
 		logout(request)
 		return redirect("login")
+
+
+
+
+				

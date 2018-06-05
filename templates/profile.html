@@ -7,26 +7,28 @@
   <div class="profile-sidebar">
     <!-- SIDEBAR USERPIC -->
     <div class="profile-userpic">
-      <img src='{{ prof_pic.url }}' class="img-responsive" alt="">
+      {% if instance.prof.image %}
+      <img src='{{ instance.prof_pic.url }}' class="img-responsive"/>
+      {% endif %}
     </div>
     <!-- END SIDEBAR USERPIC -->
     <!-- SIDEBAR USER TITLE -->
     <div class="profile-usertitle">
       <div class="profile-usertitle-name">
-        {{ first_name }} {{ last_name }}
+        {{ user.first_name }} {{ user.last_name }}
       </div>
       <div class="profile-usertitle-job">
-        @{{ username }}
+        @{{ user.username }}
       </div>
       <div class="profile-usertitle-job">
-        {{ bio }}
+        {{ instance.bio }}
       </div>
     </div>
     <!-- END SIDEBAR USER TITLE -->
     <!-- SIDEBAR BUTTONS -->
     <div class="profile-userbuttons">
       <button type="button" class="btn btn-success btn-sm">Follow</button>
-      <button type="button" class="btn btn-danger btn-sm">Message</button>
+      <button href="/edit_profile" type="button" class="btn btn-danger btn-sm">Edit Profile</button>
     </div>
     <!-- END SIDEBAR BUTTONS -->
     <!-- SIDEBAR MENU -->
@@ -109,6 +111,7 @@
             <a href="?{{ page_request_var }}={{ object_list.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">next</a>
         {% endif %}
     </span>
+
 </div>
 </div>
 

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     #local Apps
     'posts',
     'registration',
+    'comments',
 
     #third-party
     'crispy_forms',

@@ -13,5 +13,16 @@
 	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a></p>
 	<p><a href="{{ instance.get_absolute_url }}delete" class="btn btn-danger" role="button">Delete</a></p>
 	{% endif %}
+
+	<div>
+		<p class='lead'>Comments</p>
+		{% for comment in comments %}
+			<div class=''>
+				{{ comment.content }}
+				<br/>
+				<small>via {{ comment.author }} | {{ comment.timestamp|timesince }} ago</small>
+			</div>
+		{% endfor %}
+	</div>
 	
 {% endblock content %}

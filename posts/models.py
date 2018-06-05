@@ -8,6 +8,7 @@ from django.urls import reverse
 def upload_location(instance, filename):
 	return "%s/%s" %(instance.id, filename)
 
+
 class Profile(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, default=1)
 	bio = models.CharField(max_length=100)

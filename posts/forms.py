@@ -1,6 +1,15 @@
 from django import forms
 from .models import Post, Profile
 
+from django.contrib.auth import (
+	authenticate,
+	get_user_model,
+	login,
+	logout,
+)
+
+User = get_user_model()
+
 class PostForm(forms.ModelForm):
 	
 	class Meta:
@@ -8,14 +17,4 @@ class PostForm(forms.ModelForm):
 		fields = [
 			"image",
 			"content",
-		]
-
-
-class ProfileForm(forms.ModelForm):
-	
-	class Meta:
-		model = Profile
-		fields = [
-			"bio",
-			"prof_pic",
 		]
