@@ -1,9 +1,0 @@
-*.doc
-*.db
-*.pyc
-*media_cdn/
-*static_cdn/
-*my_env/
-*.sqlite3
-*__pycache__
-
