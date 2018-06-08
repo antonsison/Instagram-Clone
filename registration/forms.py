@@ -7,6 +7,7 @@ from django.contrib.auth import (
 	logout,
 )
 from posts.models import Profile
+from django.views import generic
 
 User = get_user_model()
 
@@ -52,16 +53,19 @@ class UserRegisterForm(forms.Form):
 	# 		"username",
 	# 		"password",
 	# 		"bio",
-			
+	# 		"prof_pic",
 	# 	]
 
-	def clean(self):
+	def clean_username(self):
+		
 		username = self.cleaned_data.get('username')
 		username_qs = User.objects.filter(username=username)
 		if username_qs.exists():
 			raise forms.ValidationError("This username has already been used")
 
-		email = self.cleaned_data.get('email')
-		email_qs = User.objects.filter(email=email)
-		if email_qs.exists():
-			raise forms.ValidationError("This email has already been registered")
+
+		# email = self.cleaned_data.get('email')
+		# email_qs = User.objects.filter(email=email)
+		# if email_qs.exists():
+		# 	raise forms.ValidationError("This email has already been registered")
+

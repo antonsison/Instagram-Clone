@@ -40,8 +40,8 @@ class LoginView(generic.TemplateView):
 			# 	return redirect("/")
 			username = self.request.POST['username']
 			password = self.request.POST['password']
-			new_user = authenticate(username=username, password=password)
-			login(self.request, new_user)
+			user = authenticate(username=username, password=password)
+			login(self.request, user)
 			return redirect("/")
 
 		return render(request, self.template_name, context)
@@ -53,14 +53,17 @@ class RegisterView(generic.TemplateView):
 	def get_context_data(self, *args, **kwargs):
 		context = super(RegisterView, self).get_context_data(*args, **kwargs)
 		title = "Register"
-		form = UserRegisterForm(self.request.POST or None, self.request.FILES or None)
+		form = UserRegisterForm(
+			self.request.POST or None, 
+			self.request.FILES or None
+		)
 		context.update({
 			"title":title,
 			"form":form,
 		})
 		return context
 
-	def post(self, request):
+	def post(self, *args, **kwargs):
 		context = self.get_context_data()
 		form = context.get('form')
 		if form.is_valid():
@@ -86,18 +89,20 @@ class RegisterView(generic.TemplateView):
 			user.set_password(user.password)
 			user.save()
 			instance.bio = self.request.POST['bio']
+			instance.prof_pic = self.request.FILES.get('prof_pic')
 			instance.user = user
 			instance.save()
-			return redirect("login")
+			login(self.request, instance.user)
+			return redirect("/")
 
 
-		return render(request, self.template_name, context)
+		return render(self.request, self.template_name, context)
 
 
 class LogoutView(generic.TemplateView):
 
 	def get(self, request):
-		logout(request)
+		logout(self.request)
 		return redirect("login")
 
 

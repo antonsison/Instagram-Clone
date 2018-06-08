@@ -1,27 +1,70 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
 
 
 {% block content %}
-	{% if instance.image %}
-	<img src='{{ instance.image.url }}' class='img-responsive'/>
-	{% endif %}
-	<p>Author: @{{ instance.author }}</p>
-	<p>Posted on: {{ instance.updated }}</p>
-	{{ instance.content|linebreaks }}<br>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="thumbnail">
+				{% if instance.image %}
+				<img src='{{ instance.image.url }}' class='img-responsive'/>
+				{% endif %}
+				<div class="caption">
+					<p>Author: @{{ instance.author }}</p>
+					<p>Posted on: {{ instance.updated }}</p>
+					<p>{{ instance.content|linebreaks }}</p>
+				</div>
+			</div>
+		</div>
+	<hr/>
+	</div>
 
 	{% if request.user == instance.author %}
-	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a></p>
-	<p><a href="{{ instance.get_absolute_url }}delete" class="btn btn-danger" role="button">Delete</a></p>
+	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a>
+	<a href="{{ instance.get_delete_url }}" class="btn btn-danger" role="button">Delete</a></p>
 	{% endif %}
 
 	<div>
 		<p class='lead'>Comments</p>
+		<form method="POST" action=".">{% csrf_token %}
+			{{ comment_form|crispy }}
+			<input type='submit' value='Post Comment' class='btn btn-default'>
+		</form>
+		<hr/>
 		{% for comment in comments %}
-			<div class=''>
-				{{ comment.content }}
-				<br/>
-				<small>via {{ comment.author }} | {{ comment.timestamp|timesince }} ago</small>
+		<blockquote class="blockquote">
+			<p>{{ comment.content }}</p>
+			<p class="mb-0">via @{{ comment.author }} | 
+				{{ comment.timestamp|timesince }} ago | 
+				{% if comment.children.count > 0 %}
+				{{ comment.children.count }} Comment{% if comment.children.count > 1 %}s | {% else %} |{% endif %}
+				{% endif %}
+				<a  class='comment-reply-btn' href='#'>Reply</a> | 
+        <a  class='' href='{{ comment.get_absolute_url }}'>Thread</a> |
+        {% if request.user == comment.author %}<a href='{{ comment.get_delete_url }}'>Delete</a> |{% endif %}
+        {% if request.user == comment.author %}<a href='{{ comment.get_edit_url }}'>Edit</a>{% endif %}</p>
+
+			<div class='comment-reply'>
+				{% for child_comment in comment.children %}
+				<blockquote class="blockquote">
+					<p>{{ child_comment.content }}</p>
+					<p class="mb-0">via @{{ child_comment.author }} | 
+					{{ child_comment.timestamp|timesince }} ago |
+          {% if request.user == child_comment.author %}<a href='{{ child_comment.get_delete_url }}'>Delete</a> |{% endif %}
+          {% if request.user == child_comment.author %}<a href='{{ child_comment.get_edit_url }}'>Edit</a>{% endif %}</p>
+				</blockquote>
+				{% endfor %}
+
+				<form method="POST" action=".">{% csrf_token %}
+					{{ comment_form|crispy }}
+					<input type='hidden' name='parent_id' value='{{ comment.id }}'>
+					<input type='submit' value='Reply' class='btn btn-default'>
+				</form>
 			</div>
+
+		</blockquote>
+		<hr/>
 		{% endfor %}
 	</div>
 	

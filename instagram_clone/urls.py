@@ -21,6 +21,7 @@ from registration.views import LoginView, RegisterView, LogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('comments/', include('comments.urls', namespace="comments")),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
