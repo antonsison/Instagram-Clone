@@ -24,10 +24,10 @@ class CreateView(generic.TemplateView):
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated:
-            title = "Create"
+            title = "Create Post"
             user = self.request.user
             users = Profile.objects.all()
-            prof_instance = get_object_or_404(Profile, user=user)
+            instance = get_object_or_404(Profile, user=user)
             form = PostForm(
                 self.request.POST or None, 
                 self.request.FILES or None
@@ -39,12 +39,18 @@ class CreateView(generic.TemplateView):
             "title":title,
             "form": form,
             "users":users,
-            "prof_instance":prof_instance,
+            "instance":instance,
+            "prof_instance":instance,
         }
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
         if self.request.user.is_authenticated:
+            title = "Create Post"
+            user = self.request.user
+            users = Profile.objects.all()
+            instance = get_object_or_404(Profile, user=user)
+
             form = PostForm(
                 self.request.POST or None, 
                 self.request.FILES or None
@@ -61,6 +67,7 @@ class CreateView(generic.TemplateView):
         "title":title,
         "instance": instance,
         "form": form,
+        "prof_instance":instance,
         }
         return render(self.request, self.template_name, context)
 
@@ -77,6 +84,7 @@ class ListView(generic.ListView):
             queryset_list = Post.objects.all()
             users = Profile.objects.all()
 
+            # error = False
             query = self.request.GET.get("q")
             if query:
                 queryset_list = queryset_list.filter(
@@ -86,7 +94,8 @@ class ListView(generic.ListView):
                     Q(author__last_name__icontains=query)
 
                 ).distinct()
-
+            # elif not query:
+            #     error = True
 
             paginator = Paginator(queryset_list, 3)
             page_request_var = 'page'

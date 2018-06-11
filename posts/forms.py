@@ -4,13 +4,20 @@ from .models import Post, Profile
 from django.contrib.auth.models import User
 
 class PostForm(forms.ModelForm):
-	
+	content = forms.CharField(label='Caption', required=False)
 	class Meta:
 		model = Post
 		fields = [
-			"image",
-			"content",
+			'image',
+			'content',
 		]
+
+	def clean_image(self):
+		image = self.cleaned_data.get('image')
+
+		if image == None:
+			raise forms.ValidationError('Post must have an image!')
+
 
 class EditProfileForm(forms.Form):
 	email = forms.EmailField(label='Email Address')
@@ -30,18 +37,22 @@ class EditPasswordForm(forms.Form):
 	password  = forms.CharField(label="Password", widget=forms.PasswordInput)
 	password2  = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
-	# class Meta:
-	# 	model = User
-	# 	fields = [
-	# 		"password"
-	# 		"password2"
-	# 	]
+	# def clean_password(self):
+	# 	password = self.cleaned_data.get('password')
+	# 	if password == None:
+	# 		raise forms.ValidationError('Password is required!')
 
 	def clean_password2(self):
 		password = self.cleaned_data.get('password')
 		password2 = self.cleaned_data.get('password2')
+		# if password2 == None:
+		# 	raise forms.ValidationError('You need to confirm your password!')
+
 		if password2 != password:
-			raise forms.ValidationError("Passwords must match")
+			raise forms.ValidationError('Passwords must match')
+
+
+
 
 
 class EditProfPicForm(forms.Form):
