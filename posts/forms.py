@@ -17,7 +17,6 @@ class EditProfileForm(forms.Form):
 	first_name = forms.CharField(max_length=20)
 	last_name = forms.CharField(max_length=20)
 	bio = forms.CharField(max_length=200, required=False)
-	prof_pic = forms.ImageField(label='Profile Picture', required=False)
 
 
 	# def clean_email(self):
