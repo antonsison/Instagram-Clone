@@ -6,10 +6,12 @@ from django.views import generic
 from .forms import CommentForm
 from .models import Comment
 from posts.models import Profile
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
-class CommentView(generic.TemplateView):
-    template_name = "comment_thread.html"
+class CommentView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'comment_thread.html'
 
     def get(self, *args, **kwargs):
         id = kwargs.get('id', None)
@@ -22,17 +24,17 @@ class CommentView(generic.TemplateView):
             instance = instance.parent
 
         initial_data = {
-            "content_type":instance.content_type,
-            "object_id":instance.object_id,
+            'content_type':instance.content_type,
+            'object_id':instance.object_id,
         }
 
         form = CommentForm(self.request.POST or None, initial=initial_data)
 
         context = {
-            "comment": instance,
-            "form":form,
-            "prof_instance":prof_instance,
-            "users":users,
+            'comment': instance,
+            'form':form,
+            'prof_instance':prof_instance,
+            'users':users,
         }
         return render(self.request, self.template_name, context)
 
@@ -50,19 +52,19 @@ class CommentView(generic.TemplateView):
 
 
         initial_data = {
-            "content_type":instance.content_type,
-            "object_id":instance.object_id,
+            'content_type':instance.content_type,
+            'object_id':instance.object_id,
         }
         form = CommentForm(self.request.POST or None, initial=initial_data)
 
         if form.is_valid():
-            c_type = form.cleaned_data.get("content_type")
+            c_type = form.cleaned_data.get('content_type')
             content_type = ContentType.objects.get(model=c_type)
-            obj_id = form.cleaned_data.get("object_id")
-            content_data = form.cleaned_data.get("content")
+            obj_id = form.cleaned_data.get('object_id')
+            content_data = form.cleaned_data.get('content')
             parent_obj = None
             try:
-                parent_id = self.request.POST.get("parent_id")
+                parent_id = self.request.POST.get('parent_id')
             except:
                 parent_id = None
 
@@ -81,16 +83,17 @@ class CommentView(generic.TemplateView):
             return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
 
         context = {
-            "comment": instance,
-            "form":form,
-            "prof_instance":prof_instance,
-            "users":users,
+            'comment': instance,
+            'form':form,
+            'prof_instance':prof_instance,
+            'users':users,
         }
         return render(self.request, self.template_name, context)
 
 
-class CommentDeleteView(generic.TemplateView):
-    template_name = "confirm_delete.html"
+class CommentDeleteView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'confirm_delete.html'
 
     def get(self, *args, **kwargs):
         id = kwargs.get('id', None)
@@ -107,9 +110,9 @@ class CommentDeleteView(generic.TemplateView):
             raise Http404
 
         context = {
-            "instance":instance,
-            "prof_instance":prof_instance,
-            "users":users,
+            'instance':instance,
+            'prof_instance':prof_instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
@@ -129,27 +132,28 @@ class CommentDeleteView(generic.TemplateView):
         if self.request.user != instance.author:
             raise Http404
 
-        if self.request.method == "POST":
+        if self.request.method == 'POST':
             parent_instance_url = instance.content_object.get_absolute_url()
             instance.delete()
             return HttpResponseRedirect(parent_instance_url)
 
         context = {
-            "instance":instance,
-            "prof_instance":prof_instance,
-            "users":users,
+            'instance':instance,
+            'prof_instance':prof_instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
 
 
 
-class CommentEditView(generic.TemplateView):
-    template_name = "post_form.html"
-    title = "Edit Comment"
+class CommentEditView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'post_form.html'
+    title = 'Edit Comment'
 
     def get(self, *args, **kwargs):
-        title = "Edit Comment"
+        title = 'Edit Comment'
         id = kwargs.get('id', None)
         user = self.request.user
         users = Profile.objects.all()
@@ -157,7 +161,7 @@ class CommentEditView(generic.TemplateView):
         prof_instance = get_object_or_404(Profile, user=user)
 
         info = {
-            "content":instance.content
+            'content':instance.object_id
         }
         
         form = CommentForm(
@@ -166,16 +170,16 @@ class CommentEditView(generic.TemplateView):
         )
 
         context = {
-            "title":title,
-            "instance": instance,
-            "prof_instance":prof_instance,
-            "form":form,
-            "users":users,
+            'title':title,
+            'instance': instance,
+            'prof_instance':prof_instance,
+            'form':form,
+            'users':users,
         }
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        title = "Edit Comment"
+        title = 'Edit Comment'
         id = kwargs.get('id', None)
         user = self.request.user
         users = Profile.objects.all()
@@ -183,7 +187,7 @@ class CommentEditView(generic.TemplateView):
         prof_instance = get_object_or_404(Profile, user=user)
 
         info = {
-            "content":instance.content
+            'content':instance.content
         }
 
         form = CommentForm(
@@ -197,11 +201,11 @@ class CommentEditView(generic.TemplateView):
             return HttpResponseRedirect(instance.content_object.get_absolute_url())
 
         context = {
-            "title":title,
-            "instance": instance,
-            "prof_instance":prof_instance,
-            "form":form,
-            "users":users,
+            'title':title,
+            'instance': instance,
+            'prof_instance':prof_instance,
+            'form':form,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)

@@ -14,119 +14,111 @@ from .models import Post, Profile
 from .forms import PostForm, EditProfileForm, EditPasswordForm, EditProfPicForm
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
-class CreateView(generic.TemplateView):
-    template_name = "post_form.html"
+class CreateView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'post_form.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            title = "Create Post"
-            user = self.request.user
-            users = Profile.objects.all()
-            prof_instance = get_object_or_404(Profile, user=user)
+        title = 'Create Post'
+        user = self.request.user
+        users = Profile.objects.all()
+        prof_instance = get_object_or_404(Profile, user=user)
 
-            form = PostForm(
-                self.request.POST or None, 
-                self.request.FILES or None
-            )
-        else:
-            raise Http404
+        form = PostForm(
+            self.request.POST or None, 
+            self.request.FILES or None
+        )
 
         context = {
-            "title":title,
-            "form": form,
-            "users":users,
-            "prof_instance":prof_instance,
+            'title':title,
+            'form': form,
+            'users':users,
+            'prof_instance':prof_instance,
         }
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            title = "Create Post"
-            user = self.request.user
-            users = Profile.objects.all()
-            prof_instance = get_object_or_404(Profile, user=user)
+        title = 'Create Post'
+        user = self.request.user
+        users = Profile.objects.all()
+        prof_instance = get_object_or_404(Profile, user=user)
 
-            form = PostForm(
-                self.request.POST or None, 
-                self.request.FILES or None
-            )
+        form = PostForm(
+            self.request.POST or None, 
+            self.request.FILES or None
+        )
 
-            if form.is_valid():
-                instance = Post()
-                instance.image = self.request.FILES.get('image')
-                instance.content = self.request.POST['content']
-                instance.author = self.request.user
-                instance.save()
-                return HttpResponseRedirect("/")
-        else:
-            raise Http404
+        if form.is_valid():
+            instance = Post()
+            instance.image = self.request.FILES.get('image')
+            instance.content = self.request.POST['content']
+            instance.author = self.request.user
+            instance.save()
+            return HttpResponseRedirect('/')
         context = {
-            "title":title,
-            "form": form,
-            "users":users,
-            "prof_instance":prof_instance,
+            'title':title,
+            'form': form,
+            'users':users,
+            'prof_instance':prof_instance,
         }
         return render(self.request, self.template_name, context)
 
 
-class ListView(generic.ListView):
-    template_name = "post_list.html"
+class ListView(LoginRequiredMixin, generic.ListView):
+    login_url = 'login'
+    template_name = 'post_list.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
+        user = self.request.user
+        instance = get_object_or_404(Profile, user=user)
 
-            user = self.request.user
-            instance = get_object_or_404(Profile, user=user)
+        queryset_list = Post.objects.all()
+        users = Profile.objects.all()
 
-            queryset_list = Post.objects.all()
-            users = Profile.objects.all()
+        error = False
+        if 'q' in self.request.GET:
+            query = self.request.GET.get('q')
 
-            error = False
-            if 'q' in self.request.GET:
-                query = self.request.GET.get("q")
-                if query:
-                    queryset_list = queryset_list.filter(
-                        Q(content__icontains=query) |
-                        Q(author__username__icontains=query) |
-                        Q(author__first_name__icontains=query) |
-                        Q(author__last_name__icontains=query)
+            if not query:
+                error = True
 
-                    ).distinct()
-                elif not query:
-                    error = True
+            else:
+                queryset_list = queryset_list.filter(
+                    Q(content__icontains=query) |
+                    Q(author__username__icontains=query) |
+                    Q(author__first_name__icontains=query) |
+                    Q(author__last_name__icontains=query)
 
+                ).distinct()
 
-            paginator = Paginator(queryset_list, 3)
-            page_request_var = 'page'
-            page = self.request.GET.get(page_request_var)
-            try:
-                queryset = paginator.page(page)
-            except PageNotAnInteger:
-                queryset = paginator.page(1)
-            except EmptyPage:
-                queryset = paginator.page(paginator.num_pages)
-
-        else:
-            raise Http404
+        paginator = Paginator(queryset_list, 3)
+        page_request_var = 'page'
+        page = self.request.GET.get(page_request_var)
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+        except EmptyPage:
+            queryset = paginator.page(paginator.num_pages)
 
         context = {
-            "object_list":queryset,
-            "page_request_var": page_request_var,
-            "instance":instance,
-            "prof_instance":instance,
-            "users":users,
-            "error":error,
+            'object_list':queryset,
+            'page_request_var': page_request_var,
+            'instance':instance,
+            'prof_instance':instance,
+            'users':users,
+            'error':error,
         }
 
         return render(self.request,self.template_name,context)
 
-class DetailView(generic.DetailView):
-    template_name = "post_detail.html"
+class DetailView(LoginRequiredMixin, generic.DetailView):
+    login_url = 'login'
+    template_name = 'post_detail.html'
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated:
@@ -138,8 +130,8 @@ class DetailView(generic.DetailView):
 
 
             initial_data = {
-                "content_type":instance.get_content_type,
-                "object_id":instance.id,
+                'content_type':instance.get_content_type,
+                'object_id':instance.id,
             }
 
             form = CommentForm(
@@ -152,90 +144,90 @@ class DetailView(generic.DetailView):
 
         comments = instance.comments
         context = {
-        "instance": instance,
-        "comments":comments,
-        "comment_form":form,
-        "users":users,
-        "prof_instance":prof_instance,
+            'instance': instance,
+            'comments':comments,
+            'comment_form':form,
+            'users':users,
+            'prof_instance':prof_instance,
         }
 
         return render(self.request, self.template_name, context)
 
 
     def post(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            id = kwargs.get('id', None)
-            instance = get_object_or_404(Post, id=id)
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Post, id=id)
 
-            user = self.request.user
-            users = Profile.objects.all()
-            prof_instance = get_object_or_404(Profile, user=user)
+        user = self.request.user
+        users = Profile.objects.all()
+        prof_instance = get_object_or_404(Profile, user=user)
 
-            initial_data = {
-                "content_type":instance.get_content_type,
-                "object_id":instance.id,
-            }
+        initial_data = {
+            'content_type':instance.get_content_type,
+            'object_id':instance.id,
+        }
 
-            form = CommentForm(
-                self.request.POST or None, 
-                initial=initial_data
+        form = CommentForm(
+            self.request.POST or None, 
+            initial=initial_data
+        )
+
+        if form.is_valid():
+            c_type = form.cleaned_data.get('content_type')
+            content_type = ContentType.objects.get(model=c_type)
+            obj_id = form.cleaned_data.get('object_id')
+            content_data = form.cleaned_data.get('content')
+            parent_obj = None
+            try:
+                parent_id = self.request.POST.get('parent_id')
+            except:
+                parent_id = None
+
+            if parent_id:
+                parent_qs = Comment.objects.filter(id=parent_id)
+                if parent_qs.exists() and parent_qs.count() == 1:
+                    parent_obj = parent_qs.first()
+
+            new_comment, created = Comment.objects.get_or_create(
+                author = self.request.user,
+                content_type = content_type,
+                object_id = obj_id,
+                content = content_data,
+                parent = parent_obj,        
             )
+            return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
 
-            if form.is_valid():
-                c_type = form.cleaned_data.get("content_type")
-                content_type = ContentType.objects.get(model=c_type)
-                obj_id = form.cleaned_data.get("object_id")
-                content_data = form.cleaned_data.get("content")
-                parent_obj = None
-                try:
-                    parent_id = self.request.POST.get("parent_id")
-                except:
-                    parent_id = None
-
-                if parent_id:
-                    parent_qs = Comment.objects.filter(id=parent_id)
-                    if parent_qs.exists() and parent_qs.count() == 1:
-                        parent_obj = parent_qs.first()
-
-                new_comment, created = Comment.objects.get_or_create(
-                    author = self.request.user,
-                    content_type = content_type,
-                    object_id = obj_id,
-                    content = content_data,
-                    parent = parent_obj,        
-                )
-                return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
-        else:
-            raise Http404
 
         comments = instance.comments
+
         context = {
-        "instance": instance,
-        "comments":comments,
-        "comment_form":form,
-        "users":users,
-        "prof_instance":prof_instance,
+            'instance': instance,
+            'comments':comments,
+            'comment_form':form,
+            'users':users,
+            'prof_instance':prof_instance,
         }
 
         return render(self.request, self.template_name, context)
 
 
-class UpdateView(generic.TemplateView):
-    template_name = "post_form.html"
+class UpdateView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'post_form.html'
 
     def get(self, *args, **kwargs):
-        title = "Update"
+        title = 'Update'
         id = kwargs.get('id', None)
         instance = get_object_or_404(Post, id=id)
         
         user = self.request.user
         users = Profile.objects.all()
         prof_instance = get_object_or_404(Profile, user=user)
-        if self.request.user.is_authenticated and self.request.user == instance.author:
+        if self.request.user == instance.author:
 
             initial_data = {
-                "image":instance.image,
-                "content":instance.content
+                'image':instance.image,
+                'content':instance.content
             }
 
             form = PostForm(
@@ -247,22 +239,22 @@ class UpdateView(generic.TemplateView):
         else:
             raise Http404
         context = {
-            "title":title,
-            "instance": instance,
-            "form":form,
-            "users":users,
-            "prof_instance":prof_instance
+            'title':title,
+            'instance': instance,
+            'form':form,
+            'users':users,
+            'prof_instance':prof_instance
         }
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
         id = kwargs.get('id', None)
         instance = get_object_or_404(Post, id=id)
-        if self.request.user.is_authenticated and self.request.user == instance.author:
+        if self.request.user == instance.author:
 
             initial_data = {
-                "image":instance.image,
-                "content":instance.content
+                'image':instance.image,
+                'content':instance.content
             }
 
             form = PostForm(
@@ -281,16 +273,17 @@ class UpdateView(generic.TemplateView):
             raise Http404
 
         context = {
-            "title":title,
-            "instance": instance,
-            "form":form,
+            'title':title,
+            'instance': instance,
+            'form':form,
         }
 
         return render(self.request, self.template_name, context)
 
 
-class DeleteView(generic.TemplateView):
-    template_name = "confirm_delete.html"
+class DeleteView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'confirm_delete.html'
     def get(self, *args, **kwargs):
         id = kwargs.get('id', None)
         instance = get_object_or_404(Post, id=id)
@@ -306,8 +299,8 @@ class DeleteView(generic.TemplateView):
             raise Http404
 
         context = {
-            "instance":instance,
-            "prof_instance":prof_instance,
+            'instance':instance,
+            'prof_instance':prof_instance,
         }
 
         return render(self.request, self.template_name, context)
@@ -326,24 +319,25 @@ class DeleteView(generic.TemplateView):
         if self.request.user != instance.author:
             raise Http404
 
-        if self.request.method == "POST":
+        if self.request.method == 'POST':
             instance.delete()
-            return HttpResponseRedirect(reverse ("posts:list"))
+            return HttpResponseRedirect(reverse ('posts:list'))
 
         context = {
-            "instance":instance,
-            "prof_instance":prof_instance,
+            'instance':instance,
+            'prof_instance':prof_instance,
         }
 
         return render(self.request, self.template_name, context)
 
 class AboutView(generic.TemplateView):
-	template_name = "post_about.html"
+	template_name = 'post_about.html'
 
 
 
-class ProfileView(generic.TemplateView):
-    template_name = "profile.html"
+class ProfileView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'profile.html'
 
     def get(self, *args, **kwargs):
 
@@ -357,10 +351,10 @@ class ProfileView(generic.TemplateView):
 
 
         context = {
-            "object_list":queryset,
-            "instance":instance,
-            "prof_instance":instance,
-            "users":users,
+            'object_list':queryset,
+            'instance':instance,
+            'prof_instance':instance,
+            'users':users,
         }
 
         return render(self.request,self.template_name,context)
@@ -368,88 +362,85 @@ class ProfileView(generic.TemplateView):
 
 
 
-class EditProfileView(generic.TemplateView):
+class EditProfileView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
     template_name = 'post_form.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-             title = "Edit Profile"
-             user = self.request.user
-             users = Profile.objects.all()
-             instance = get_object_or_404(Profile, user=user)
+        title = 'Edit Profile'
+        user = self.request.user
+        users = Profile.objects.all()
+        instance = get_object_or_404(Profile, user=user)
 
-             initial_data = {
-                "email":user.email,
-                "first_name":user.first_name,
-                "last_name":user.last_name,
-                "username":user.username,
-                "bio":instance.bio,
-                "prof_pic":instance.prof_pic,
-            }
+        initial_data = {
+            'email':user.email,
+            'first_name':user.first_name,
+            'last_name':user.last_name,
+            'username':user.username,
+            'bio':instance.bio,
+            'prof_pic':instance.prof_pic,
+        }
 
-             form = EditProfileForm(
-                self.request.POST or None, 
-                self.request.FILES or None,
-                initial=initial_data,
-            )
-        else:
-            raise Http404
+        form = EditProfileForm(
+            self.request.POST or None, 
+            self.request.FILES or None,
+            initial=initial_data,
+        )
+
         context = {
-            "title":title,
-            "instance": instance,
-            "prof_instance":instance,
-            "form":form,
-            "users":users,
+            'title':title,
+            'instance': instance,
+            'prof_instance':instance,
+            'form':form,
+            'users':users,
         }
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            title = "Edit Profile"	
-            user = self.request.user
-            users = Profile.objects.all()
-            instance = get_object_or_404(Profile, user=user)
+        title = 'Edit Profile'	
+        user = self.request.user
+        users = Profile.objects.all()
+        instance = get_object_or_404(Profile, user=user)
 
-            initial_data = {
-                "email":user.email,
-                "first_name":user.first_name,
-                "last_name":user.last_name,
-                "username":user.username,
-                "bio":instance.bio,
-                "prof_pic":instance.prof_pic,
-            }
+        initial_data = {
+            'email':user.email,
+            'first_name':user.first_name,
+            'last_name':user.last_name,
+            'username':user.username,
+            'bio':instance.bio,
+            'prof_pic':instance.prof_pic,
+        }
 
-            form = EditProfileForm(
-                self.request.POST or None, 
-                self.request.FILES or None,
-                initial=initial_data,
-            )
+        form = EditProfileForm(
+            self.request.POST or None, 
+            self.request.FILES or None,
+            initial=initial_data,
+        )
 
-            if form.is_valid():
-                user.email = self.request.POST['email']
-                user.first_name = self.request.POST['first_name']
-                user.last_name = self.request.POST['last_name']
-                user.save()
-                instance.bio = self.request.POST['bio']
-                return HttpResponseRedirect(reverse("posts:list"))
-        else:
-            raise Http404
+        if form.is_valid():
+            user.email = self.request.POST['email']
+            user.first_name = self.request.POST['first_name']
+            user.last_name = self.request.POST['last_name']
+            user.save()
+            instance.bio = self.request.POST['bio']
+            return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
-        	"title":title,
-            "instance": instance,
-            "prof_instance":instance,
-            "form":form,
-            "users":users,
+        	'title':title,
+            'instance': instance,
+            'prof_instance':instance,
+            'form':form,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
 
-class EditPassword(generic.TemplateView):
-    template_name="post_form.html"
+class EditPassword(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name='post_form.html'
 
     def get(self, *args, **kwargs):
-        title = "Edit Password"
+        title = 'Edit Password'
         user = self.request.user
         users = Profile.objects.all()
         instance = get_object_or_404(Profile, user=user)
@@ -459,17 +450,17 @@ class EditPassword(generic.TemplateView):
         )
 
         context = {
-            "title":title,
-            "form":form,
-            "prof_instance":instance,
-            "users":users,
+            'title':title,
+            'form':form,
+            'prof_instance':instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
 
 
     def post(self, *args, **kwargs):
-        title = "Edit Password"
+        title = 'Edit Password'
         users = Profile.objects.all()
         user = self.request.user
         instance = get_object_or_404(Profile, user=user)
@@ -483,29 +474,30 @@ class EditPassword(generic.TemplateView):
             user.set_password(user.password)
             user.save()
             login(self.request, user)
-            return HttpResponseRedirect(reverse("posts:list"))
+            return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
-            "title":title,
-            "form":form,
-            "prof_instance":instance,
-            "users":users,
+            'title':title,
+            'form':form,
+            'prof_instance':instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
 
 
-class EditProfPic(generic.TemplateView):
-    template_name="post_form.html"
+class EditProfPic(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name='post_form.html'
 
     def get(self, *args, **kwargs):
-        title = "Edit Profile Picture"
+        title = 'Edit Profile Picture'
         user = self.request.user
         users = Profile.objects.all()
         instance = get_object_or_404(Profile, user=user)
 
         initial_data = {
-            "prof_pic":instance.prof_pic,
+            'prof_pic':instance.prof_pic,
         }
 
         form = EditProfPicForm(
@@ -514,23 +506,23 @@ class EditProfPic(generic.TemplateView):
         )
 
         context = {
-            "title":title,
-            "form":form,
-            "prof_instance":instance,
-            "users":users,
+            'title':title,
+            'form':form,
+            'prof_instance':instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
 
 
     def post(self, *args, **kwargs):
-        title = "Edit Profile Picture"
+        title = 'Edit Profile Picture'
         users = Profile.objects.all()
         user = self.request.user
         instance = get_object_or_404(Profile, user=user)
 
         initial_data = {
-            "prof_pic":instance.prof_pic,
+            'prof_pic':instance.prof_pic,
         }
 
         form = EditProfPicForm(
@@ -542,13 +534,13 @@ class EditProfPic(generic.TemplateView):
             if self.request.FILES.get('prof_pic'):
                     instance.prof_pic = self.request.FILES.get('prof_pic')
             instance.save()
-            return HttpResponseRedirect(reverse("posts:list"))
+            return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
-            "title":title,
-            "form":form,
-            "prof_instance":instance,
-            "users":users,
+            'title':title,
+            'form':form,
+            'prof_instance':instance,
+            'users':users,
         }
 
         return render(self.request, self.template_name, context)
