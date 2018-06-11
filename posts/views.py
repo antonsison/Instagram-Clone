@@ -27,7 +27,8 @@ class CreateView(generic.TemplateView):
             title = "Create Post"
             user = self.request.user
             users = Profile.objects.all()
-            instance = get_object_or_404(Profile, user=user)
+            prof_instance = get_object_or_404(Profile, user=user)
+
             form = PostForm(
                 self.request.POST or None, 
                 self.request.FILES or None
@@ -39,8 +40,7 @@ class CreateView(generic.TemplateView):
             "title":title,
             "form": form,
             "users":users,
-            "instance":instance,
-            "prof_instance":instance,
+            "prof_instance":prof_instance,
         }
         return render(self.request, self.template_name, context)
 
@@ -49,7 +49,7 @@ class CreateView(generic.TemplateView):
             title = "Create Post"
             user = self.request.user
             users = Profile.objects.all()
-            instance = get_object_or_404(Profile, user=user)
+            prof_instance = get_object_or_404(Profile, user=user)
 
             form = PostForm(
                 self.request.POST or None, 
@@ -57,17 +57,19 @@ class CreateView(generic.TemplateView):
             )
 
             if form.is_valid():
-                instance = form.save(commit=False)
+                instance = Post()
+                instance.image = self.request.FILES.get('image')
+                instance.content = self.request.POST['content']
                 instance.author = self.request.user
                 instance.save()
                 return HttpResponseRedirect("/")
         else:
             raise Http404
         context = {
-        "title":title,
-        "instance": instance,
-        "form": form,
-        "prof_instance":instance,
+            "title":title,
+            "form": form,
+            "users":users,
+            "prof_instance":prof_instance,
         }
         return render(self.request, self.template_name, context)
 
@@ -84,18 +86,20 @@ class ListView(generic.ListView):
             queryset_list = Post.objects.all()
             users = Profile.objects.all()
 
-            # error = False
-            query = self.request.GET.get("q")
-            if query:
-                queryset_list = queryset_list.filter(
-                    Q(content__icontains=query) |
-                    Q(author__username__icontains=query) |
-                    Q(author__first_name__icontains=query) |
-                    Q(author__last_name__icontains=query)
+            error = False
+            if 'q' in self.request.GET:
+                query = self.request.GET.get("q")
+                if query:
+                    queryset_list = queryset_list.filter(
+                        Q(content__icontains=query) |
+                        Q(author__username__icontains=query) |
+                        Q(author__first_name__icontains=query) |
+                        Q(author__last_name__icontains=query)
 
-                ).distinct()
-            # elif not query:
-            #     error = True
+                    ).distinct()
+                elif not query:
+                    error = True
+
 
             paginator = Paginator(queryset_list, 3)
             page_request_var = 'page'
@@ -116,6 +120,7 @@ class ListView(generic.ListView):
             "instance":instance,
             "prof_instance":instance,
             "users":users,
+            "error":error,
         }
 
         return render(self.request,self.template_name,context)

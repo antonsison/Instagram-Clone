@@ -3,14 +3,9 @@ from .models import Post, Profile
 
 from django.contrib.auth.models import User
 
-class PostForm(forms.ModelForm):
+class PostForm(forms.Form):
+	image = forms.ImageField(required=False)
 	content = forms.CharField(label='Caption', required=False)
-	class Meta:
-		model = Post
-		fields = [
-			'image',
-			'content',
-		]
 
 	def clean_image(self):
 		image = self.cleaned_data.get('image')
