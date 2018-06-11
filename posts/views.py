@@ -233,10 +233,15 @@ class UpdateView(generic.TemplateView):
         prof_instance = get_object_or_404(Profile, user=user)
         if self.request.user.is_authenticated and self.request.user == instance.author:
 
+            initial_data = {
+                "image":instance.image,
+                "content":instance.content
+            }
+
             form = PostForm(
                 self.request.POST or None, 
                 self.request.FILES or None, 
-                instance=instance
+                initial=initial_data
             )
 
         else:
@@ -254,14 +259,22 @@ class UpdateView(generic.TemplateView):
         id = kwargs.get('id', None)
         instance = get_object_or_404(Post, id=id)
         if self.request.user.is_authenticated and self.request.user == instance.author:
+
+            initial_data = {
+                "image":instance.image,
+                "content":instance.content
+            }
+
             form = PostForm(
                 self.request.POST or None, 
                 self.request.FILES or None, 
-                instance=instance
+                initial=initial_data
             )
 
         if form.is_valid():
-            instance = form.save(commit=False)
+            if self.request.FILES.get('image'):
+                instance.image = self.request.FILES.get('image')
+            instance.content = self.request.POST['content']
             instance.save()
             return HttpResponseRedirect(instance.get_absolute_url())
         else:
