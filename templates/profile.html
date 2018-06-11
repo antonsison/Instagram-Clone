@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-sm-6 col-md-4">
+    <div class="col-sm-4 col-md-4">
         {% for object in object_list %}
         <a href="{{ object.get_absolute_url }}" class="thumbnail">
             {% if object.image %}
