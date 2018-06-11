@@ -43,3 +43,7 @@ class EditPasswordForm(forms.Form):
 		password2 = self.cleaned_data.get('password2')
 		if password2 != password:
 			raise forms.ValidationError("Passwords must match")
+
+
+class EditProfPicForm(forms.Form):
+	prof_pic = forms.ImageField(label='Profile Picture', required=False)

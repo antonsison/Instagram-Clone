@@ -11,9 +11,10 @@ from django.urls import reverse
 from comments.forms import CommentForm
 from comments.models import Comment
 from .models import Post, Profile
-from .forms import PostForm, EditProfileForm, EditPasswordForm
+from .forms import PostForm, EditProfileForm, EditPasswordForm, EditProfPicForm
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+
 
 
 # Create your views here.
@@ -403,9 +404,6 @@ class EditProfileView(generic.TemplateView):
                 user.last_name = self.request.POST['last_name']
                 user.save()
                 instance.bio = self.request.POST['bio']
-                if self.request.FILES.get('prof_pic'):
-                    instance.prof_pic = self.request.FILES.get('prof_pic')
-                instance.save()
                 return HttpResponseRedirect(reverse("posts:list"))
         else:
             raise Http404
@@ -458,6 +456,65 @@ class EditPassword(generic.TemplateView):
             user.set_password(user.password)
             user.save()
             login(self.request, user)
+            return HttpResponseRedirect(reverse("posts:list"))
+
+        context = {
+            "title":title,
+            "form":form,
+            "prof_instance":instance,
+            "users":users,
+        }
+
+        return render(self.request, self.template_name, context)
+
+
+class EditProfPic(generic.TemplateView):
+    template_name="post_form.html"
+
+    def get(self, *args, **kwargs):
+        title = "Edit Profile Picture"
+        user = self.request.user
+        users = Profile.objects.all()
+        instance = get_object_or_404(Profile, user=user)
+
+        initial_data = {
+            "prof_pic":instance.prof_pic,
+        }
+
+        form = EditProfPicForm(
+            self.request.POST or None,
+            initial=initial_data,
+        )
+
+        context = {
+            "title":title,
+            "form":form,
+            "prof_instance":instance,
+            "users":users,
+        }
+
+        return render(self.request, self.template_name, context)
+
+
+    def post(self, *args, **kwargs):
+        title = "Edit Profile Picture"
+        users = Profile.objects.all()
+        user = self.request.user
+        instance = get_object_or_404(Profile, user=user)
+
+        initial_data = {
+            "prof_pic":instance.prof_pic,
+        }
+
+        form = EditProfPicForm(
+            self.request.POST or None,
+            initial=initial_data,
+        )
+
+        if form.is_valid():
+            if self.request.FILES.get('prof_pic'):
+                    instance.prof_pic = self.request.FILES.get('prof_pic')
+            instance.save()
             return HttpResponseRedirect(reverse("posts:list"))
 
         context = {

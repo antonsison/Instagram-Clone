@@ -30,8 +30,9 @@
                 <!-- SIDEBAR USERPIC -->
                 <div class="profile-userpic">
                     {% if prof_instance.prof_pic %}
+                    <a href='{% url "posts:edit_prof_pic" %}'>
                     <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
-            
+                    </a>
                     {% endif %}
                 </div>
                 <!-- END SIDEBAR USERPIC -->
