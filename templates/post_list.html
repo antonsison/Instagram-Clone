@@ -5,10 +5,19 @@
 
 {% block content %}
 
+
+
 <form method='GET' action=''>
-  <input type='text' name='q' placeholder="Search posts" value='{{ request.GET.q  }}'/>
-  <input type='submit' value='Search' />
+    <input type='text' name='q' placeholder="Search posts" value='{{ request.GET.q  }}'/>
+    <input type='submit' value='Search' />
 </form>
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+Search not found! Please search again!
+</div>
+{% endif %}
+
 {% for object in object_list %}
 <div class="row">
   <div class="col-sm-12">
@@ -27,6 +36,11 @@
   </div>
 <hr/>
 </div>
+{% empty %}
+<div class="alert alert-danger" role="alert">
+    Search not found! Please search again!
+</div>
+
 {% endfor %}
 
 <div class="pagination">

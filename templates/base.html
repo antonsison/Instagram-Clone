@@ -33,6 +33,10 @@
                     <a href='{% url "posts:edit_prof_pic" %}'>
                     <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
                     </a>
+                    {% else %}
+                    <a href='{% url "posts:edit_prof_pic" %}'>
+                    <img src='{% static "images/default_pic.jpg" %}' class='img-responsive'/>
+                    </a>
                     {% endif %}
                 </div>
                 <!-- END SIDEBAR USERPIC -->

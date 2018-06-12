@@ -83,10 +83,7 @@ class ListView(LoginRequiredMixin, generic.ListView):
         if 'q' in self.request.GET:
             query = self.request.GET.get('q')
 
-            if not query:
-                error = True
-
-            else:
+            if query:
                 queryset_list = queryset_list.filter(
                     Q(content__icontains=query) |
                     Q(author__username__icontains=query) |
@@ -94,6 +91,9 @@ class ListView(LoginRequiredMixin, generic.ListView):
                     Q(author__last_name__icontains=query)
 
                 ).distinct()
+
+            elif not query:
+                error = True
 
         paginator = Paginator(queryset_list, 3)
         page_request_var = 'page'
@@ -121,25 +121,22 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
     template_name = 'post_detail.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            id = kwargs.get('id', None)
-            instance = get_object_or_404(Post, id=id)
-            users = Profile.objects.all()
-            user = self.request.user
-            prof_instance = get_object_or_404(Profile, user=user)
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Post, id=id)
+        users = Profile.objects.all()
+        user = self.request.user
+        prof_instance = get_object_or_404(Profile, user=user)
 
 
-            initial_data = {
-                'content_type':instance.get_content_type,
-                'object_id':instance.id,
-            }
+        initial_data = {
+            'content_type':instance.get_content_type,
+            'object_id':instance.id,
+        }
 
-            form = CommentForm(
-                self.request.POST or None, 
-                initial=initial_data
-            )
-        else:
-            raise Http404
+        form = CommentForm(
+            self.request.POST or None, 
+            initial=initial_data
+        )
 
 
         comments = instance.comments
@@ -378,7 +375,6 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
             'last_name':user.last_name,
             'username':user.username,
             'bio':instance.bio,
-            'prof_pic':instance.prof_pic,
         }
 
         form = EditProfileForm(
@@ -408,7 +404,6 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
             'last_name':user.last_name,
             'username':user.username,
             'bio':instance.bio,
-            'prof_pic':instance.prof_pic,
         }
 
         form = EditProfileForm(
@@ -423,6 +418,7 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
             user.last_name = self.request.POST['last_name']
             user.save()
             instance.bio = self.request.POST['bio']
+            instance.save()
             return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
