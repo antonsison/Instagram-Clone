@@ -5,15 +5,15 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-sm-4 col-md-4">
-        {% for object in object_list %}
+    {% for object in object_list %}
+    <div class="col-sm-4"> 
         <a href="{{ object.get_absolute_url }}" class="thumbnail">
             {% if object.image %}
             <img src="{{ object.image.url }}" >
             {% endif %}
-        </a>
-        {% endfor %}
+        </a>      
     </div>
+    {% endfor %}
 </div>
 {% endblock content %}
 

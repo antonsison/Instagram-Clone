@@ -16,6 +16,7 @@ from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+
 # Create your views here.
 
 class CreateView(LoginRequiredMixin, generic.TemplateView):
@@ -331,20 +332,38 @@ class AboutView(generic.TemplateView):
 	template_name = 'post_about.html'
 
 
-
 class ProfileView(LoginRequiredMixin, generic.TemplateView):
     login_url = 'login'
     template_name = 'profile.html'
 
     def get(self, *args, **kwargs):
-
-
         users = Profile.objects.all()
-
         user = self.request.user
         instance = get_object_or_404(Profile, user=user)
 
         queryset = Post.objects.all().filter(author=user)
+
+
+        context = {
+            'object_list':queryset,
+            'instance':instance,
+            'prof_instance':instance,
+            'users':users,
+        }
+
+        return render(self.request,self.template_name,context)
+
+
+class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
+    login_url = 'login'
+    template_name = 'profile.html'
+
+    def get(self, *args, **kwargs):
+        users = Profile.objects.all()
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Profile, user_id=id)
+
+        queryset = Post.objects.all().filter(author_id=id)
 
 
         context = {
