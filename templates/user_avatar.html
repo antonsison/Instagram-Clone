@@ -1,0 +1,14 @@
+{% for profile in users %}
+<!-- <i class="glyphicon glyphicon-user"></i> -->
+<div class="col-sm-3">
+    <img src='{{ profile.prof_pic.url }}' class='img-responsive img-circle' height='65' width='65'/>
+</div>
+<div class="profile-usertitle">
+    <div class="profile-usertitle-job">
+    <a href="{% url 'posts:profile_with_user' id=profile.user_id %}">
+    @{{ profile.user.username }}
+    </a>
+    </div>
+</div>
+<hr>
+{% endfor %}

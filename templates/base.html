@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load custom_tags %}
 <!--DOCTYPE html -->
 <html>
 
@@ -105,11 +106,7 @@
                             Users </a>
                         </li>
                         <li>
-                            {% for profile in users %}
-                            <a href="{% url 'posts:profile_with_user' id=profile.user_id %}">
-                            <i class="glyphicon glyphicon-user"></i>
-                            {{ profile.user.username }}</a>
-                            {% endfor %}
+                            {% avatar prof_instance.user_id %}
                         </li>
                     </ul>
 
