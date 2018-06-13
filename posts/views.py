@@ -11,8 +11,8 @@ from django.urls import reverse
 from comments.forms import CommentForm
 from comments.models import Comment
 from .models import Post, Profile
-from .forms import PostForm, EditProfileForm, EditPasswordForm, EditProfPicForm
 from django.contrib.auth import login
+from .forms import PostForm, EditProfileForm, EditPasswordForm, EditProfPicForm
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -20,6 +20,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 class CreateView(LoginRequiredMixin, generic.TemplateView):
+    """
+    Logged in user creates a new post
+    """
     login_url = 'login'
     template_name = 'post_form.html'
 
@@ -54,11 +57,7 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
         )
 
         if form.is_valid():
-            instance = Post()
-            instance.image = self.request.FILES.get('image')
-            instance.content = self.request.POST['content']
-            instance.author = self.request.user
-            instance.save()
+            form.save(user=user)
             return HttpResponseRedirect('/')
         context = {
             'title':title,
@@ -70,6 +69,9 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
 
 
 class ListView(LoginRequiredMixin, generic.ListView):
+    """
+    A list of the posts of all the users
+    """
     login_url = 'login'
     template_name = 'post_list.html'
 
@@ -118,6 +120,9 @@ class ListView(LoginRequiredMixin, generic.ListView):
         return render(self.request,self.template_name,context)
 
 class DetailView(LoginRequiredMixin, generic.DetailView):
+    """
+    Sees the detail of a single post where users can comment
+    """
     login_url = 'login'
     template_name = 'post_detail.html'
 
@@ -210,6 +215,10 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
 
 
 class UpdateView(LoginRequiredMixin, generic.TemplateView):
+    """
+    Update view is basically the edit page for the posts
+    where only the author of the post can edit his/her posts
+    """
     login_url = 'login'
     template_name = 'post_form.html'
 
@@ -280,6 +289,11 @@ class UpdateView(LoginRequiredMixin, generic.TemplateView):
 
 
 class DeleteView(LoginRequiredMixin, generic.TemplateView):
+    """
+    Delete view is when the author of a post wants to delete
+    his/her post and redirects you to a confirmation page
+    in case you change your mind on deleting the post
+    """
     login_url = 'login'
     template_name = 'confirm_delete.html'
     def get(self, *args, **kwargs):
@@ -333,6 +347,9 @@ class AboutView(generic.TemplateView):
 
 
 class ProfileView(LoginRequiredMixin, generic.TemplateView):
+    """
+    View the profile of the currently logged in user
+    """
     login_url = 'login'
     template_name = 'profile.html'
 
@@ -355,6 +372,9 @@ class ProfileView(LoginRequiredMixin, generic.TemplateView):
 
 
 class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
+    """
+    View the profile of other users
+    """
     login_url = 'login'
     template_name = 'profile.html'
 
@@ -379,6 +399,9 @@ class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
 
 
 class EditProfileView(LoginRequiredMixin, generic.TemplateView):
+    """
+    Edit the currently logged in user's profile
+    """
     login_url = 'login'
     template_name = 'post_form.html'
 
@@ -398,7 +421,6 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
 
         form = EditProfileForm(
             self.request.POST or None, 
-            self.request.FILES or None,
             initial=initial_data,
         )
 
@@ -412,8 +434,9 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        title = 'Edit Profile'	
+        title = 'Edit Profile'
         user = self.request.user
+        id = user.id
         users = Profile.objects.all()
         instance = get_object_or_404(Profile, user=user)
 
@@ -427,17 +450,11 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
 
         form = EditProfileForm(
             self.request.POST or None, 
-            self.request.FILES or None,
             initial=initial_data,
         )
 
         if form.is_valid():
-            user.email = self.request.POST['email']
-            user.first_name = self.request.POST['first_name']
-            user.last_name = self.request.POST['last_name']
-            user.save()
-            instance.bio = self.request.POST['bio']
-            instance.save()
+            form.save(user=user)
             return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
@@ -451,6 +468,9 @@ class EditProfileView(LoginRequiredMixin, generic.TemplateView):
         return render(self.request, self.template_name, context)
 
 class EditPassword(LoginRequiredMixin, generic.TemplateView):
+    """
+    Edit the currently logged in user's password
+    """    
     login_url = 'login'
     template_name='post_form.html'
 
@@ -485,9 +505,7 @@ class EditPassword(LoginRequiredMixin, generic.TemplateView):
         )
 
         if form.is_valid():
-            user.password = self.request.POST['password']
-            user.set_password(user.password)
-            user.save()
+            form.save(user=user)
             login(self.request, user)
             return HttpResponseRedirect(reverse('posts:list'))
 
@@ -502,6 +520,9 @@ class EditPassword(LoginRequiredMixin, generic.TemplateView):
 
 
 class EditProfPic(LoginRequiredMixin, generic.TemplateView):
+    """
+    Edit the currently logged in user's profile picture
+    """
     login_url = 'login'
     template_name='post_form.html'
 
@@ -517,6 +538,7 @@ class EditProfPic(LoginRequiredMixin, generic.TemplateView):
 
         form = EditProfPicForm(
             self.request.POST or None,
+            self.request.FILES or None,
             initial=initial_data,
         )
 
@@ -542,13 +564,12 @@ class EditProfPic(LoginRequiredMixin, generic.TemplateView):
 
         form = EditProfPicForm(
             self.request.POST or None,
+            self.request.FILES or None,
             initial=initial_data,
         )
 
         if form.is_valid():
-            if self.request.FILES.get('prof_pic'):
-                    instance.prof_pic = self.request.FILES.get('prof_pic')
-            instance.save()
+            form.save(user=user)
             return HttpResponseRedirect(reverse('posts:list'))
 
         context = {
