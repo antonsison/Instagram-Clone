@@ -2,12 +2,13 @@ from django import forms
 from .models import Post, Profile
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from django.forms.widgets import FileInput
 
 class PostForm(forms.Form):
 	"""
 	Form for the post when a user creates a post
 	"""
-	image = forms.ImageField(required=False)
+	image = forms.ImageField(required=False, widget=FileInput)
 	content = forms.CharField(label='Caption', required=False)
 
 	def save(self, user=None):
@@ -80,7 +81,7 @@ class EditProfPicForm(forms.Form):
 	Form for the currently logged in user if he/she wants to edit
 	his/her profile picture
 	"""
-	prof_pic = forms.ImageField(label='Profile Picture', required=False)
+	prof_pic = forms.ImageField(label='Profile Picture', required=False, widget=FileInput)
 
 	def save(self, user=None):
 		data = self.cleaned_data
