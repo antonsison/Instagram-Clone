@@ -31,25 +31,21 @@
                 <!-- SIDEBAR USERPIC -->
                 <div class="profile-userpic">
                     {% if request.user == prof_instance.user %}
-
-                    {% if prof_instance.prof_pic %}
-                    <a href='{% url "posts:edit_prof_pic" %}'>
-                    <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
-                    </a>
+                        {% if prof_instance.prof_pic %}
+                        <a href='{% url "posts:edit_prof_pic" %}'>
+                        <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
+                        </a>
+                        {% else %}
+                        <a href='{% url "posts:edit_prof_pic" %}'>
+                        <img src='{% static "images/default_pic.jpg" %}' class='img-responsive'/>
+                        </a>
+                        {% endif %}
                     {% else %}
-                    <a href='{% url "posts:edit_prof_pic" %}'>
-                    <img src='{% static "images/default_pic.jpg" %}' class='img-responsive'/>
-                    </a>
-                    {% endif %}
-
-                    {% else %}
-                    
-                    {% if prof_instance.prof_pic %}
-                    <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
-                    {% else %}
-                    <img src='{% static "images/default_pic.jpg" %}' class='img-responsive'/>
-                    {% endif %}
-
+                        {% if prof_instance.prof_pic %}
+                        <img src='{{ prof_instance.prof_pic.url }}' class='img-responsive'/>
+                        {% else %}
+                        <img src='{% static "images/default_pic.jpg" %}' class='img-responsive'/>
+                        {% endif %}
                     {% endif %}
 
                 </div>
