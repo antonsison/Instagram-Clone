@@ -80,14 +80,13 @@ class ListView(LoginRequiredMixin, generic.ListView):
         instance = get_object_or_404(Profile, user=user)
 
         queryset_list = Post.objects.all()
+        post_count = Post.objects.all().count()
         users = Profile.objects.all()
 
         error = False
         if 'q' in self.request.GET:
             query = self.request.GET.get('q')
-
-            if query:
-                queryset_list = queryset_list.filter(
+            queryset_list = queryset_list.filter(
                     Q(content__icontains=query) |
                     Q(author__username__icontains=query) |
                     Q(author__first_name__icontains=query) |
@@ -95,8 +94,14 @@ class ListView(LoginRequiredMixin, generic.ListView):
 
                 ).distinct()
 
-            elif not query:
+            if not query:
                 error = True
+            elif query and queryset_list.count() == 0:
+                error = True
+            else:
+                queryset_list
+                
+
 
         paginator = Paginator(queryset_list, 3)
         page_request_var = 'page'
@@ -149,7 +154,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         context = {
             'instance': instance,
             'comments':comments,
-            'comment_form':form,
+            'form':form,
             'users':users,
             'prof_instance':prof_instance,
         }
@@ -176,29 +181,8 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         )
 
         if form.is_valid():
-            c_type = form.cleaned_data.get('content_type')
-            content_type = ContentType.objects.get(model=c_type)
-            obj_id = form.cleaned_data.get('object_id')
-            content_data = form.cleaned_data.get('content')
-            parent_obj = None
-            try:
-                parent_id = self.request.POST.get('parent_id')
-            except:
-                parent_id = None
-
-            if parent_id:
-                parent_qs = Comment.objects.filter(id=parent_id)
-                if parent_qs.exists() and parent_qs.count() == 1:
-                    parent_obj = parent_qs.first()
-
-            new_comment, created = Comment.objects.get_or_create(
-                author = self.request.user,
-                content_type = content_type,
-                object_id = obj_id,
-                content = content_data,
-                parent = parent_obj,        
-            )
-            return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
+            new_comment = form.save(user=user)
+            return HttpResponseRedirect(new_comment.get_absolute_url())
 
 
         comments = instance.comments
@@ -206,7 +190,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         context = {
             'instance': instance,
             'comments':comments,
-            'comment_form':form,
+            'form':form,
             'users':users,
             'prof_instance':prof_instance,
         }
