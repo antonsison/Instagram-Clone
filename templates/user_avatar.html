@@ -1,7 +1,8 @@
+{% load static %}
 {% for profile in users %}
 <!-- <i class="glyphicon glyphicon-user"></i> -->
 <div class="col-sm-3">
-    <img src='{{ profile.prof_pic.url }}' class='img-responsive img-circle' height='65' width='65'/>
+    <img src='{% if profile.prof_pic %}{{ profile.prof_pic.url }}{% else %}{% static "images/default_pic.jpg" %}{% endif %}' class='img-responsive img-circle' height='65' width='65'/>
 </div>
 <div class="profile-usertitle">
     <div class="profile-usertitle-job">
