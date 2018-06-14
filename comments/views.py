@@ -1,15 +1,18 @@
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, Http404
+from django.shortcuts import render, get_object_or_404, Http404, redirect
 from django.views import generic
 
-from .forms import CommentForm
+from .forms import CommentForm, EditCommentForm
 from .models import Comment
 from posts.models import Profile
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 class CommentView(LoginRequiredMixin, generic.TemplateView):
+    """
+    User can comment on the detail view of each post
+    """
     login_url = 'login'
     template_name = 'comment_thread.html'
 
@@ -28,7 +31,10 @@ class CommentView(LoginRequiredMixin, generic.TemplateView):
             'object_id':instance.object_id,
         }
 
-        form = CommentForm(self.request.POST or None, initial=initial_data)
+        form = CommentForm(
+            self.request.POST or None, 
+            initial=initial_data
+        )
 
         context = {
             'comment': instance,
@@ -55,32 +61,15 @@ class CommentView(LoginRequiredMixin, generic.TemplateView):
             'content_type':instance.content_type,
             'object_id':instance.object_id,
         }
-        form = CommentForm(self.request.POST or None, initial=initial_data)
+
+        form = CommentForm(
+            self.request.POST or None, 
+            initial=initial_data
+        )
 
         if form.is_valid():
-            c_type = form.cleaned_data.get('content_type')
-            content_type = ContentType.objects.get(model=c_type)
-            obj_id = form.cleaned_data.get('object_id')
-            content_data = form.cleaned_data.get('content')
-            parent_obj = None
-            try:
-                parent_id = self.request.POST.get('parent_id')
-            except:
-                parent_id = None
-
-            if parent_id:
-                parent_qs = Comment.objects.filter(id=parent_id)
-                if parent_qs.exists() and parent_qs.count() == 1:
-                    parent_obj = parent_qs.first()
-
-            new_comment, created = Comment.objects.get_or_create(
-                author = self.request.user,
-                content_type = content_type,
-                object_id = obj_id,
-                content = content_data,
-                parent = parent_obj,        
-            )
-            return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
+           new_comment = form.save(user=user)
+           return HttpResponseRedirect(new_comment.get_absolute_url())
 
         context = {
             'comment': instance,
@@ -92,6 +81,9 @@ class CommentView(LoginRequiredMixin, generic.TemplateView):
 
 
 class CommentDeleteView(LoginRequiredMixin, generic.TemplateView):
+    """
+    User can delete his/her own comments
+    """
     login_url = 'login'
     template_name = 'confirm_delete.html'
 
@@ -148,6 +140,9 @@ class CommentDeleteView(LoginRequiredMixin, generic.TemplateView):
 
 
 class CommentEditView(LoginRequiredMixin, generic.TemplateView):
+    """
+    User can edit his/her own comments
+    """
     login_url = 'login'
     template_name = 'post_form.html'
     title = 'Edit Comment'
@@ -160,13 +155,13 @@ class CommentEditView(LoginRequiredMixin, generic.TemplateView):
         instance = get_object_or_404(Comment, id=id)
         prof_instance = get_object_or_404(Profile, user=user)
 
-        info = {
-            'content':instance.object_id
+        initial_data = {
+            'content':instance.content,
         }
         
-        form = CommentForm(
+        form = EditCommentForm(
             self.request.POST or None,
-            initial=info,
+            initial=initial_data,
         )
 
         context = {
@@ -186,18 +181,17 @@ class CommentEditView(LoginRequiredMixin, generic.TemplateView):
         instance = get_object_or_404(Comment, id=id)
         prof_instance = get_object_or_404(Profile, user=user)
 
-        info = {
-            'content':instance.content
+        initial_data = {
+            'content':instance.content,
         }
 
-        form = CommentForm(
+        form = EditCommentForm(
             self.request.POST or None, 
-            initial=info,
+            initial=initial_data,
         )
 
         if form.is_valid():
-            instance.content = self.request.POST['content']
-            instance.save()
+            form.save(id=id)
             return HttpResponseRedirect(instance.content_object.get_absolute_url())
 
         context = {

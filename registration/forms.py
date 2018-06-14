@@ -16,11 +16,13 @@ class UserLoginForm(forms.Form):
 	username = forms.CharField(max_length=20)
 	password = forms.CharField(widget=forms.PasswordInput)
 
-	# def save(self):
-	# 	data = self.cleaned_data
-	# 	username = data['username']
-	# 	password = data['password']
-	# 	user = authenticate(username=username, password=password)
+	def save(self):
+		data = self.cleaned_data
+		username = data['username']
+		password = data['password']
+		user = authenticate(username=username, password=password)
+
+		return user
 
 
 	def clean(self, *args, **kwargs):

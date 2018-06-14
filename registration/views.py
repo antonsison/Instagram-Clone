@@ -34,11 +34,7 @@ class LoginView(generic.TemplateView):
 		context = self.get_context_data()
 		form = context.get('form')
 		if form.is_valid():
-			# form.save()
-			data = form.cleaned_data
-			username = data['username']
-			password = data['password']
-			user = authenticate(username=username, password=password)
+			user = form.save()
 			login(self.request, user)
 			return redirect("/")
 
