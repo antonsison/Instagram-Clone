@@ -5,7 +5,7 @@ from .views import (
     UpdateView, DeleteView, 
     ProfileView, ProfileUserView,
     EditProfileView, EditPassword, 
-    EditProfPic,
+    EditProfPic, ProfileFollowToggle,
 )
 from . import views
 from . models import Profile
@@ -20,6 +20,7 @@ urlpatterns = [
     path('profile/edit/', views.EditProfileView.as_view(), name='edit_profile'),
     path('password/edit', views.EditPassword.as_view(), name='edit_password'),
     path('profile/picture/edit', views.EditProfPic.as_view(), name='edit_prof_pic'),
+    path('profile/follow/', views.ProfileFollowToggle.as_view(), name='follow'),
 	re_path(r'^(?P<id>\d+)/$', views.DetailView.as_view(), name='detail'),
 	re_path(r'^(?P<id>\d+)/edit/$', views.UpdateView.as_view(), name='update'),
 	re_path(r'^(?P<id>\d+)/delete/$', views.DeleteView.as_view(), name='delete'),

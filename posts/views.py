@@ -79,7 +79,11 @@ class ListView(LoginRequiredMixin, generic.ListView):
         user = self.request.user
         instance = get_object_or_404(Profile, user=user)
 
-        queryset_list = Post.objects.all()
+        is_following_user_ids = [x.user.id for x in user.is_following.all()]
+        queryset_list = Post.objects.filter(
+            Q(author__id__in=is_following_user_ids) |
+            Q(author=user)
+        )
         post_count = Post.objects.all().count()
         users = Profile.objects.all()
 
@@ -366,8 +370,11 @@ class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
         users = Profile.objects.all()
         id = kwargs.get('id', None)
         instance = get_object_or_404(Profile, user_id=id)
-
         queryset = Post.objects.all().filter(author_id=id)
+
+        is_following = False
+        if instance.user.profile in self.request.user.is_following.all():
+            is_following = True
 
 
         context = {
@@ -375,11 +382,23 @@ class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
             'instance':instance,
             'prof_instance':instance,
             'users':users,
+            'is_following':is_following,
         }
 
         return render(self.request,self.template_name,context)
 
-
+class ProfileFollowToggle(LoginRequiredMixin, generic.View):
+    login_url = 'login'
+    def post(self, *args, **kwargs):
+        # print(self.request.data)
+        user_to_toggle = self.request.POST.get('username')
+        profile = Profile.objects.get(user__username__iexact=user_to_toggle)
+        user = self.request.user
+        if user in profile.followers.all():
+            profile.followers.remove(user)
+        else:
+            profile.followers.add(user)
+        return redirect(f'/profile/{profile.user_id}/')
 
 
 class EditProfileView(LoginRequiredMixin, generic.TemplateView):

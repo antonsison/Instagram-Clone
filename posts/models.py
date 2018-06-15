@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from comments.models import Comment
 
+User = settings.AUTH_USER_MODEL
 # Create your models here.
 
 def upload_location(instance, filename):
@@ -13,16 +14,16 @@ def upload_location(instance, filename):
 
 class Profile(models.Model):
 	user = models.OneToOneField(
-		settings.AUTH_USER_MODEL,
+		User,
 		on_delete=models.CASCADE, 
 		default=1
 	)
 	bio = models.CharField(max_length=100)
-	follow = models.ManyToManyField('self', related_name='followers', symmetrical=False)
+	followers = models.ManyToManyField(User, related_name='is_following', blank=True, symmetrical=False)
 	prof_pic = models.ImageField(
 		upload_to=upload_location,
 		null=True, 
-		blank=True
+		blank=True,
 	)
 
 	def __str__(self):
@@ -30,7 +31,7 @@ class Profile(models.Model):
 
 class Post(models.Model):
 	author = models.ForeignKey(
-		settings.AUTH_USER_MODEL,
+		User,
 		on_delete=models.CASCADE, 
 		default=1
 	)

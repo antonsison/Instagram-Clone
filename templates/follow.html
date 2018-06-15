@@ -1,0 +1,4 @@
+<form class='form' method='POST' action='{% url "posts:follow" %}'>{% csrf_token %}
+<input type='hidden' name='username' value='{{ prof_instance.user.username }}'>
+<button class='btn {% if is_following %}btn-default{% else %}btn-primary{% endif %}'>{% if is_following %}Unfollow{% else %}Follow{% endif %}</button>
+</form>

@@ -68,6 +68,8 @@
                     {% if request.user == prof_instance.user %}
                     <a class="btn btn-info btn-sm" href='{% url "posts:edit_profile" %}'>Edit Profile</a>
                     <a class="btn btn-info btn-sm" href='{% url "posts:edit_password" %}'>Edit Password</a>
+                    {% elif request.user != prof_instance.user %}
+                    <p>{% include 'follow.html' with username=prof_instance.user.username is_following=is_following %}</p>
                     {% endif %}
                 </div>
                 <!-- END SIDEBAR BUTTONS -->
