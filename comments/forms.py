@@ -52,6 +52,6 @@ class EditCommentForm(forms.Form):
 
         content = data.get('content')
 
-        instance = get_object_or_404(Comment, id=id)
+        instance = Comment.objects.get(id=id)
         instance.content = content
         instance.save()

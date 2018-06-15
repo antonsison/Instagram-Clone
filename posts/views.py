@@ -388,6 +388,9 @@ class ProfileUserView(LoginRequiredMixin, generic.TemplateView):
         return render(self.request,self.template_name,context)
 
 class ProfileFollowToggle(LoginRequiredMixin, generic.View):
+    """
+    Logged in user can now follow other users to see their posts
+    """
     login_url = 'login'
     def post(self, *args, **kwargs):
         # print(self.request.data)

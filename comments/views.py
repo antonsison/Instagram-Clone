@@ -148,58 +148,64 @@ class CommentEditView(LoginRequiredMixin, generic.TemplateView):
     title = 'Edit Comment'
 
     def get(self, *args, **kwargs):
-        title = 'Edit Comment'
-        id = kwargs.get('id', None)
-        user = self.request.user
-        users = Profile.objects.all()
-        instance = get_object_or_404(Comment, id=id)
-        prof_instance = get_object_or_404(Profile, user=user)
+        # import pdb; pdb.set_trace()
+        try:
+            title = 'Edit Comment'
+            id = kwargs.get('id', None)
+            instance = Comment.objects.get(id=id)
+            user = self.request.user
+            users = Profile.objects.all()
+            prof_instance = get_object_or_404(Profile, user=user)
 
-        initial_data = {
-            'content':instance.content,
-        }
-        
-        form = EditCommentForm(
-            self.request.POST or None,
-            initial=initial_data,
-        )
+            initial_data = {
+                'content':instance.content,
+            }
+            
+            form = EditCommentForm(
+                self.request.POST or None,
+                initial=initial_data,
+            )
 
-        context = {
-            'title':title,
-            'instance': instance,
-            'prof_instance':prof_instance,
-            'form':form,
-            'users':users,
-        }
-        return render(self.request, self.template_name, context)
+            context = {
+                'title':title,
+                'instance': instance,
+                'prof_instance':prof_instance,
+                'form':form,
+                'users':users,
+            }
+            return render(self.request, self.template_name, context)
+        except Comment.DoesNotExist:
+            return Http404
 
     def post(self, *args, **kwargs):
-        title = 'Edit Comment'
-        id = kwargs.get('id', None)
-        user = self.request.user
-        users = Profile.objects.all()
-        instance = get_object_or_404(Comment, id=id)
-        prof_instance = get_object_or_404(Profile, user=user)
+        try:
+            title = 'Edit Comment'
+            id = kwargs.get('id', None)
+            instance = Comment.objects.get(id=id)
+            user = self.request.user
+            users = Profile.objects.all()
+            prof_instance = get_object_or_404(Profile, user=user)
 
-        initial_data = {
-            'content':instance.content,
-        }
+            initial_data = {
+                'content':instance.content,
+            }
 
-        form = EditCommentForm(
-            self.request.POST or None, 
-            initial=initial_data,
-        )
+            form = EditCommentForm(
+                self.request.POST or None,
+                initial=initial_data,
+            )
 
-        if form.is_valid():
-            form.save(id=id)
-            return HttpResponseRedirect(instance.content_object.get_absolute_url())
+            if form.is_valid():
+                form.save(id=id)
+                return HttpResponseRedirect(instance.content_object.get_absolute_url())
 
-        context = {
+            context = {
             'title':title,
             'instance': instance,
             'prof_instance':prof_instance,
             'form':form,
             'users':users,
-        }
-
-        return render(self.request, self.template_name, context)
+            }
+            return render(self.request, self.template_name, context)
+        except Comment.DoesNotExist:
+            return Http404

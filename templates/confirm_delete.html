@@ -89,7 +89,9 @@
     <form method="POST" action=".">{% csrf_token %}
         <p>Are you sure you want to delete: "{{ instance.content }}"?</p>
         <input type='submit' value='Confirm' class='btn btn-warning'>
-        <a href='{{ instance.get_absolute_url }}' type='submit' class='btn btn-default'>Cancel</a>
+
+        <a href='{{ instance.content_object.get_absolute_url }}' type='submit' class='btn btn-default'>Cancel</a>
+
     </form>
 
 </blockquote>
