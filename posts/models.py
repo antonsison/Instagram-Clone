@@ -35,12 +35,11 @@ class Post(models.Model):
 		on_delete=models.CASCADE, 
 		default=1
 	)
-
 	image = models.ImageField(
 		upload_to=upload_location,
 		null=True, 
 		blank=True)
-
+	likes = models.ManyToManyField(User, related_name='post_likes')
 	content = models.CharField(max_length=200)
 	updated = models.DateTimeField(auto_now=True, auto_now_add=False)
 	created = models.DateTimeField(auto_now=False, auto_now_add=True)
@@ -57,6 +56,9 @@ class Post(models.Model):
 
 	def get_profile_url(self):
 		return reverse('posts:profile', kwargs={ 'user':self.user.username })
+
+	def get_like_url(self):
+		return reverse('posts:like', kwargs={ 'id': self.id })
 
 	class Meta:
 		ordering = ["-created"]

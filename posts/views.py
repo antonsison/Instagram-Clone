@@ -330,6 +330,23 @@ class DeleteView(LoginRequiredMixin, generic.TemplateView):
 
         return render(self.request, self.template_name, context)
 
+class PostLikeToggle(LoginRequiredMixin, generic.RedirectView):
+    """
+    Logged in user can like or unlike own posts or other user's posts
+    """
+    login_url = 'login'
+
+    def get_redirect_url(self, *args, **kwargs):
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Post, id=id)
+        url = instance.get_absolute_url()
+        user = self.request.user
+        if user in instance.likes.all():
+            instance.likes.remove(user)
+        else:
+            instance.likes.add(user)
+        return url
+
 class AboutView(generic.TemplateView):
 	template_name = 'post_about.html'
 

@@ -11,7 +11,8 @@
 				<img src='{{ instance.image.url }}' class='img-responsive'/>
 				{% endif %}
 				<div class="caption">
-					<p>Author: @{{ instance.author }}</p>
+					<p>Likes: {{ instance.likes.count }}</p>
+					<p>Author:  <a href="{% url 'posts:profile_with_user' id=instance.author.id %}">@{{ instance.author }}</a></p>
 					<p>Posted on: {{ instance.updated }}</p>
 					<p>{{ instance.content|linebreaks }}</p>
 				</div>
@@ -19,9 +20,9 @@
 		</div>
 	<hr/>
 	</div>
-
+	<p><a href='{{ instance.get_like_url }}' class='btn {% if request.user in instance.likes.all %}btn-default{% else %}btn-info{% endif %}'>{% if request.user in instance.likes.all %}Unlike{% else %}Like{% endif %}</a>
 	{% if request.user == instance.author %}
-	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a>
+	<a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a>
 	<a href="{{ instance.get_delete_url }}" class="btn btn-danger" role="button">Delete</a></p>
 	{% endif %}
 
