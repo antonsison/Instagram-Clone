@@ -15,6 +15,11 @@ from django.contrib.auth import login
 from .forms import PostForm, EditProfileForm, EditPasswordForm, EditProfPicForm
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+try:
+    from django.utils import simplejson as json
+except ImportError:
+    import json
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -140,7 +145,10 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         instance = get_object_or_404(Post, id=id)
         users = Profile.objects.all()
         user = self.request.user
+        like = 'false'
         prof_instance = get_object_or_404(Profile, user=user)
+        if user in instance.likes.all():
+            like = 'true'
 
 
         initial_data = {
@@ -161,6 +169,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
             'form':form,
             'users':users,
             'prof_instance':prof_instance,
+            'like':like,
         }
 
         return render(self.request, self.template_name, context)
@@ -197,6 +206,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
             'form':form,
             'users':users,
             'prof_instance':prof_instance,
+            'like':like,
         }
 
         return render(self.request, self.template_name, context)
@@ -330,22 +340,25 @@ class DeleteView(LoginRequiredMixin, generic.TemplateView):
 
         return render(self.request, self.template_name, context)
 
-class PostLikeToggle(LoginRequiredMixin, generic.RedirectView):
+class PostLikeToggle(LoginRequiredMixin, generic.View):
     """
     Logged in user can like or unlike own posts or other user's posts
     """
     login_url = 'login'
 
-    def get_redirect_url(self, *args, **kwargs):
+    def post(self, *args, **kwargs):
         id = kwargs.get('id', None)
         instance = get_object_or_404(Post, id=id)
         url = instance.get_absolute_url()
         user = self.request.user
-        if user in instance.likes.all():
+        like = self.request.POST.get('liked')
+        print(like, type(like))
+        if like == 'true':
             instance.likes.remove(user)
+            return JsonResponse({'liked':'true'})
         else:
             instance.likes.add(user)
-        return url
+            return JsonResponse({'liked':'false'})
 
 class AboutView(generic.TemplateView):
 	template_name = 'post_about.html'

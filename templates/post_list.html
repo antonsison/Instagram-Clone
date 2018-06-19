@@ -29,6 +29,7 @@ Search not found! Please search again!
       <div class="caption">
         <p>Author: <a href="{% url 'posts:profile_with_user' id=object.author.id %}">@{{ object.author }}</a></p>
         <p>Posted on: {{ object.updated }}</p>
+        <p>Likes: {{ object.likes.count }}</p>
         <p>{{ object.content|linebreaks|truncatechars:120 }}</p>
         <p><a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">View</a></p>
       </div>

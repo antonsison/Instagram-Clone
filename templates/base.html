@@ -131,21 +131,13 @@
 
 
 <!-- Latest compiled and minified JavaScript -->
-<script   src="http://code.jquery.com/jquery-1.12.2.min.js"   integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+<script   src="http://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
-<script type="text/javascript">
-  $(document).ready(function(){
+{% block javascript %}
+{% endblock javascript %}
 
-    $(".comment-reply-btn").click(function(event) {
-      event.preventDefault();
-      $(this).parent().next(".comment-reply").fadeToggle();
-    })
-
-  })
-
-</script>
 </body>
 
 </html>

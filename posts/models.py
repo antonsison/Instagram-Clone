@@ -60,6 +60,7 @@ class Post(models.Model):
 	def get_like_url(self):
 		return reverse('posts:like', kwargs={ 'id': self.id })
 
+
 	class Meta:
 		ordering = ["-created"]
 
