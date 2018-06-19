@@ -20,15 +20,16 @@
 		</div>
 	<hr/>
 	</div>
-
-	<input type='button' data-initial='{{ like }}' data-name='{{ instance.id }}' data-counter='{{ instance.likes.count }}' 
+	{% csrf_token %}
+	<input type='button' data-initial='{{ like }}' data-url='{{ instance.get_like_url }}' 
+	data-name='{{ instance.id }}' data-counter='{{ instance.likes.count }}'
 	class='like btn 
 	{% if like == 'true' %}btn-default
 	{% else %}btn-info
 	{% endif %}' 
 	{% if like == 'true' %}value='Unlike' data-bool='{{ like }}'
 	{% else %}value='Like' data-bool='{{ like }}'{% endif %} />
-
+	<br><br>
 	{% if request.user == instance.author %}
 	<p><a href="{{ instance.get_absolute_url }}edit" class="btn btn-primary" role="button">Edit</a>
 	<a href="{{ instance.get_delete_url }}" class="btn btn-danger" role="button">Delete</a></p>
@@ -81,81 +82,5 @@
 {% endblock content %}
 
 {% block javascript %}
-	<script type="text/javascript">
-	  $(document).ready(function(){
-	  	var likes = $('#like_count').html;
-
-	    $(".comment-reply-btn").click(function(event) {
-	      event.preventDefault();
-	      $(this).parent().next(".comment-reply").fadeToggle();
-	    })
-
-	  })
-
-	</script>
-
-	<script>
-		var likes = parseInt($('#like_count')[0].textContent);
-		$('.like').click(function(){
-			var initial = $(this).data('initial');
-			var isLiked = $(this).data('bool');
-			var post_id = $(this).data('name')
-			var counter = $('#like_count')[0];
-
-			$(this).data('bool', isLiked ? false:true);
-/*			console.log(isLiked)
-			console.log(counter)
-			console.log(likes, 'jhkhjk')
-*/
-			if (initial) {
-				if (isLiked) {
-					$(this).removeClass('btn-default').addClass('btn-info');
-					$(this).attr('value', 'Like')
-					counter.innerHTML = likes - 1
-
-				} else {
-					$(this).removeClass('btn-info').addClass('btn-default');
-					$(this).attr('value', 'Unlike')
-					counter.innerHTML = likes
-
-				}
-			} else {
-				if (isLiked) {
-					$(this).removeClass('btn-default').addClass('btn-info');
-					$(this).attr('value', 'Like')
-					counter.innerHTML = likes
-
-				} else {
-					$(this).removeClass('btn-info').addClass('btn-default');
-					$(this).attr('value', 'Unlike')
-					counter.innerHTML = likes + 1
-
-				}
-			}
-			
-
-
-			$.ajax({
-				type: "POST",
-				url: '{{ instance.get_like_url }}',
-				data: {'id': post_id, 'liked': isLiked, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
-				success: function(data) {
-					console.log(data.liked)
-	/*				if (data.liked) {
-						$(this).removeClass('btn-info').addClass('btn-default');
-						$(this).attr('value', 'Unlike')
-						
-					} else {
-						$(this).removeClass('btn-default').addClass('btn-info');
-						$(this).attr('value', 'Like')
-					}
-*/
-                },
-
-                error: function(err) {
-                	console.log(err, 'error');
-                }
-            });
-        });
-	</script>
-	{% endblock javascript %}
+<script src="{% static 'js/script.js' %}"></script>
+{% endblock javascript %}

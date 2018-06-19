@@ -360,6 +360,7 @@ class PostLikeToggle(LoginRequiredMixin, generic.View):
             instance.likes.add(user)
             return JsonResponse({'liked':'false'})
 
+
 class AboutView(generic.TemplateView):
 	template_name = 'post_about.html'
 
