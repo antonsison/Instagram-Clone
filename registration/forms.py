@@ -87,3 +87,11 @@ class UserRegisterForm(forms.Form):
 
 		return username
 
+	def clean_email(self):
+		email = self.data.get('email')
+		email_qs = User.objects.filter(email=email)
+		if email_qs.exists():
+			raise forms.ValidationError("This email has already been used")
+
+		return email
+

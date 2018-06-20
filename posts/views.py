@@ -435,6 +435,58 @@ class ProfileFollowToggle(LoginRequiredMixin, generic.View):
         return redirect(f'/profile/{profile.user_id}/')
 
 
+class ProfileFollowersView(LoginRequiredMixin, generic.TemplateView):
+    """
+    View the followers of the logged in user and other users
+    """
+    login_url = 'login'
+    template_name = 'profile_followers.html'
+
+    def get(self, *args, **kwargs):
+        users = Profile.objects.all()
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Profile, user_id=id)
+
+        is_following = False
+        if instance.user.profile in self.request.user.is_following.all():
+            is_following = True
+
+        context = {
+            'instance':instance,
+            'prof_instance':instance,
+            'users':users,
+            'is_following':is_following,
+        }
+
+        return render(self.request,self.template_name,context)
+
+
+class ProfileFollowingView(LoginRequiredMixin, generic.TemplateView):
+    """
+    View the users followed by logged in user and other users
+    """
+    login_url = 'login'
+    template_name = 'profile_following.html'
+
+    def get(self, *args, **kwargs):
+        users = Profile.objects.all()
+        id = kwargs.get('id', None)
+        instance = get_object_or_404(Profile, user_id=id)
+
+        is_following = False
+        if instance.user.profile in self.request.user.is_following.all():
+            is_following = True
+
+        context = {
+            'instance':instance,
+            'prof_instance':instance,
+            'users':users,
+            'is_following':is_following,
+        }
+
+        return render(self.request,self.template_name,context)
+
+
 class EditProfileView(LoginRequiredMixin, generic.TemplateView):
     """
     Edit the currently logged in user's profile

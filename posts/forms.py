@@ -51,6 +51,15 @@ class EditProfileForm(forms.Form):
 		instance.bio = data['bio']
 		instance.save()
 
+		def clean_email(self):
+			email = self.data.get('email')
+			username = self.initial.get('username')
+			email_qs = User.objects.filter(email=email).exclude(username=username)
+			if email_qs.exists():
+				raise forms.ValidationError("This email has already been used")
+
+			return email
+
 
 	
 class EditPasswordForm(forms.Form):

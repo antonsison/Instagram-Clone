@@ -61,6 +61,10 @@
                     <div class="profile-usertitle-job">
                         {{ prof_instance.bio }}
                     </div>
+                    <div class="profile-usertitle-job">
+                        <a href='{% url "posts:profile_followers" id=prof_instance.user_id %}'>Followers: {{ prof_instance.followers.count }}</a> &nbsp;&nbsp;
+                        <a href='{% url "posts:profile_following" id=prof_instance.user_id %}'>Following: {{ prof_instance.user.is_following.count }}</a>
+                    </div>
                 </div>
                 <!-- END SIDEBAR USER TITLE -->
                 <!-- SIDEBAR BUTTONS -->

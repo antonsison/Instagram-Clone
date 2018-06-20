@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+<div class='row'>
+    {% for profile in prof_instance.user.is_following.all %}
+    <div class='col-sm-4 text-center'>
+        <div class='align-center'>
+            {% if profile.prof_pic %}
+            <img src='{{ profile.prof_pic.url }}'class='img-responsive img-circle' height='100' width='100' style='margin: 0 auto;'/>
+            {% else %}
+            <img src='{% static "images/default_pic.jpg" %}' class='img-responsive img-circle' height='100' width='100' style='margin: 0 auto;'/>
+            {% endif %}
+        </div>
+        <div class="profile-usertitle-name">
+            {{ profile.user.first_name }} {{ profile.user.last_name }}
+        </div>
+        <div class="profile-usertitle-job">
+            <a href='{% url "posts:profile_with_user" id=profile.user_id %}'>@{{ profile }}</a>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock content %}
